@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import ProductTable from "../Products/ProductTable";
 
 export default function AppTable() {
   return (
@@ -20,7 +21,9 @@ export default function AppTable() {
           <Button>Add Product</Button>
         </CardAction>
       </CardHeader>
-      <CardContent />
+      <CardContent>
+        <ProductTable />
+      </CardContent>
     </Card>
   );
 }
