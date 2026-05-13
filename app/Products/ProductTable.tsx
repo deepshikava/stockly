@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { IoClose } from "react-icons/io5";
+import { StatusDropDown } from "../AppTable/dropdowns/StatusDropDown";
 
 export default function ProductTable() {
   return (
@@ -11,7 +12,7 @@ export default function ProductTable() {
         <div className="flex items-center justify-between">
           <Input placeholder="Search by name...." className="max-w-sm h-10" />
           <div className="flex items-center gap-4">
-            <Button variant={"secondary"}>Status</Button>
+            <StatusDropDown />
             <Button variant={"secondary"}>Category</Button>
           </div>
         </div>
