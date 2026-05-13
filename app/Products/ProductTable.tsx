@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { IoClose } from "react-icons/io5";
 import { StatusDropDown } from "../AppTable/dropdowns/StatusDropDown";
+import { CategoryDropDown } from "../AppTable/dropdowns/CategoryDropDown";
 
 export default function ProductTable() {
   return (
@@ -13,7 +14,7 @@ export default function ProductTable() {
           <Input placeholder="Search by name...." className="max-w-sm h-10" />
           <div className="flex items-center gap-4">
             <StatusDropDown />
-            <Button variant={"secondary"}>Category</Button>
+            <CategoryDropDown />
           </div>
         </div>
 
