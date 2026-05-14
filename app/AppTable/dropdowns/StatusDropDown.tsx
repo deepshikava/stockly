@@ -46,7 +46,6 @@ export function StatusDropDown() {
   const [open, setOpen] = useState(false);
 
   function returnColor(status: string) {
-    console.log(status);
     switch (status) {
       case "Published":
         return "text-green-600 bg-green-100";

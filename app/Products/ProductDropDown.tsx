@@ -20,8 +20,6 @@ type MenuItem = {
 };
 
 export default function ProductDropDown({ row }: { row: Row<Product> }) {
-  console.log(row);
-
   const menuItems: MenuItem[] = [
     { icon: <MdContentCopy />, label: "Copy", className: "" },
     { icon: <FaRegEdit />, label: "Edit", className: "" },

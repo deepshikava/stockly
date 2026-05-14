@@ -1,6 +1,6 @@
 "use client";
 
-import { ColumnDef, Row } from "@tanstack/react-table";
+import { Column, ColumnDef, Row } from "@tanstack/react-table";
 import { ReactNode } from "react";
 import { FaCheck, FaInbox } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
@@ -38,6 +38,46 @@ export type Product = {
   createdAt: Date;
 };
 
+type SortableHeaderProps = {
+  column: Column<Product, unknown>; // Specify the type of data
+  label: string;
+};
+
+const SortableHeader: React.FC<SortableHeaderProps> = ({ column, label }) => {
+  const isSorted = column.getIsSorted();
+  const SortingIcon =
+    isSorted === "asc"
+      ? IoMdArrowDown
+      : isSorted === "desc"
+        ? IoMdArrowUp
+        : ArrowUpDown;
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" aria-label={`Sort by ${label}`}>
+          {label}
+          <SortingIcon className="ml-2 h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" side="bottom">
+        <DropdownMenuItem
+          onClick={() => column.toggleSorting(false)}
+        >
+          <IoMdArrowUp className="mr-2 h-4 w-4" />
+          Asc
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => column.toggleSorting(true)}
+        >
+          <IoMdArrowDown className="mr-2 h-4 w-4" />
+          Desc
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
 export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "name",
@@ -54,53 +94,24 @@ export const columns: ColumnDef<Product>[] = [
         </div>
       );
     },
-    header: ({ column }) => {
-      const isSorted = column.getIsSorted();
-      const SortingIcon =
-        isSorted === "asc"
-          ? IoMdArrowDown
-          : isSorted === "desc"
-            ? IoMdArrowUp
-            : ArrowUpDown;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" aria-label="Sort by Name">
-              Name
-              <SortingIcon className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" side="bottom">
-            <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
-              <IoMdArrowUp className="mr-2 h-4 w-4" />
-              Asc
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
-              <IoMdArrowDown className="mr-2 h-4 w-4" />
-              Desc
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
+    header: ({ column }) => <SortableHeader column={column} label="Name" />,
   },
   {
     accessorKey: "sku",
-    header: () => "SKU",
+    header: ({ column }) => <SortableHeader column={column} label="SKU" />,
   },
   {
     accessorKey: "price",
-    header: () => "Price",
+    header: ({ column }) => <SortableHeader column={column} label="Price" />,
     cell: ({ getValue }) => `$${getValue<number>().toFixed(2)}`,
   },
   {
     accessorKey: "category",
-    header: () => "Category",
+    header: ({ column }) => <SortableHeader column={column} label="Category" />,
   },
   {
     accessorKey: "status",
-    header: () => "Status",
+    header: ({ column }) => <SortableHeader column={column} label="Status" />,
     cell: ({ row }) => {
       const status = row.original.status;
       let colorClass;
@@ -136,14 +147,16 @@ export const columns: ColumnDef<Product>[] = [
   },
   {
     accessorKey: "quantityInStock",
-    header: () => "Quantity in Stock",
+    header: ({ column }) => (
+      <SortableHeader column={column} label="Quantity in Stock" />
+    ),
   },
   {
     accessorKey: "supplier",
-    header: () => "Supplier",
+    header: ({ column }) => <SortableHeader column={column} label="Supplier" />,
   },
   {
-    accessorKey: "actions",
+    id: "actions",
     cell: ({ row }) => {
       return <ProductDropDown row={row} />;
     },
