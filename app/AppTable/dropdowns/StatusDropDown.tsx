@@ -24,6 +24,11 @@ type Status = {
   icon: React.ReactNode;
 };
 
+type StatusDropDownProps = {
+  selectedStatuses: string[];
+  setSelectedStatuses: React.Dispatch<React.SetStateAction<string[]>>;
+};
+
 const statuses: Status[] = [
   {
     value: "published",
@@ -42,7 +47,10 @@ const statuses: Status[] = [
   },
 ];
 
-export function StatusDropDown() {
+export function StatusDropDown({
+  selectedStatuses,
+  setSelectedStatuses,
+}: StatusDropDownProps) {
   const [open, setOpen] = useState(false);
 
   function returnColor(status: string) {
@@ -56,6 +64,20 @@ export function StatusDropDown() {
       default:
         return "";
     }
+  }
+
+  function handleCheckboxChange(value: string) {
+    setSelectedStatuses((prev) => {
+      const updatedStatuses = prev.includes(value)
+        ? prev.filter((status) => status !== value)
+        : [...prev, value];
+
+      return updatedStatuses;
+    });
+  }
+
+  function clearFilters() {
+    setSelectedStatuses([]);
   }
 
   return (
@@ -80,8 +102,13 @@ export function StatusDropDown() {
                     className="h-10 mb-2"
                     key={status.value}
                     value={status.value}
+                    onClick={() => handleCheckboxChange(status.value)}
                   >
-                    <Checkbox className="size-4 rounded-[4px]" />
+                    <Checkbox
+                      checked={selectedStatuses.includes(status.value)}
+                      onCheckedChange={() => handleCheckboxChange(status.value)}
+                      className="size-4 rounded-[4px]"
+                    />
                     <div
                       className={`flex items-center gap-1 ${returnColor(status.label)} p-1 rounded-lg px-4 text-[13px]`}
                     >
@@ -94,7 +121,11 @@ export function StatusDropDown() {
             </CommandList>
             <div className="flex flex-col gap-2 text-[23px]">
               <Separator />
-              <Button variant={"ghost"} className="text-[12px] mb-1">
+              <Button
+                variant={"ghost"}
+                className="text-[12px] mb-1"
+                onClick={clearFilters}
+              >
                 Clear Filters
               </Button>
             </div>

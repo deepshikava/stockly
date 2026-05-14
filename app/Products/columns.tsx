@@ -61,15 +61,11 @@ const SortableHeader: React.FC<SortableHeaderProps> = ({ column, label }) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" side="bottom">
-        <DropdownMenuItem
-          onClick={() => column.toggleSorting(false)}
-        >
+        <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
           <IoMdArrowUp className="mr-2 h-4 w-4" />
           Asc
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => column.toggleSorting(true)}
-        >
+        <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
           <IoMdArrowDown className="mr-2 h-4 w-4" />
           Desc
         </DropdownMenuItem>
@@ -107,10 +103,12 @@ export const columns: ColumnDef<Product>[] = [
   },
   {
     accessorKey: "category",
+    filterFn: "multiSelect",
     header: ({ column }) => <SortableHeader column={column} label="Category" />,
   },
   {
     accessorKey: "status",
+    filterFn: "multiSelect",
     header: ({ column }) => <SortableHeader column={column} label="Status" />,
     cell: ({ row }) => {
       const status = row.original.status;

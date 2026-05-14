@@ -22,6 +22,11 @@ type Category = {
   label: string;
 };
 
+type CategoryDropDownProps = {
+  selectedCategories: string[];
+  setSelectedCategories: React.Dispatch<React.SetStateAction<string[]>>;
+};
+
 const categories: Category[] = [
   { value: "electronics", label: "Electronics" },
   { value: "furniture", label: "Furniture" },
@@ -30,13 +35,33 @@ const categories: Category[] = [
   { value: "toys", label: "Toys" },
   { value: "beauty", label: "Beauty" },
   { value: "sports", label: "Sports" },
-  { value: "home-decor", label: "Home Decor" },
-  { value: "home-appliances", label: "Home Appliances" },
+  { value: "home decor", label: "Home Decor" },
+  { value: "home appliances", label: "Home Appliances" },
   { value: "others", label: "Others" },
 ];
 
-export function CategoryDropDown() {
+export function CategoryDropDown({
+  selectedCategories,
+  setSelectedCategories,
+}: CategoryDropDownProps) {
   const [open, setOpen] = useState(false);
+
+  function handleCheckboxChange(value: string) {
+    console.log("Handling change for category:", value);
+
+    setSelectedCategories((prev) => {
+      const updatedCategories = prev.includes(value)
+        ? prev.filter((category) => category !== value)
+        : [...prev, value];
+
+      console.log("Updated Categories:", updatedCategories); // Debug log for updated state
+      return updatedCategories;
+    });
+  }
+
+  function clearFilters() {
+    setSelectedCategories([]);
+  }
 
   return (
     <div className="flex items-center space-x-4 poppins">
@@ -65,7 +90,11 @@ export function CategoryDropDown() {
                     key={category.value}
                     value={category.value}
                   >
-                    <Checkbox className="size-4 rounded-[4px]" />
+                    <Checkbox
+                      checked={selectedCategories.includes(category.value)}
+                      onClick={() => handleCheckboxChange(category.value)}
+                      className="size-4 rounded-[4px]"
+                    />
                     <div
                       className={`flex items-center gap-1 p-1 rounded-lg px-3 text-[14px]`}
                     >
@@ -77,7 +106,11 @@ export function CategoryDropDown() {
             </CommandList>
             <div className="flex flex-col gap-2 text-[23px]">
               <Separator />
-              <Button variant={"ghost"} className="text-[12px] mb-1">
+              <Button
+                variant={"ghost"}
+                className="text-[12px] mb-1"
+                onClick={clearFilters}
+              >
                 Clear Filters
               </Button>
             </div>

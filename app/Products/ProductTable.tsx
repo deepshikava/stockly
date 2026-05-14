@@ -10,6 +10,7 @@ import {
   useReactTable,
   ColumnFiltersState,
   getFilteredRowModel,
+  FilterFn,
 } from "@tanstack/react-table";
 
 import {
@@ -28,7 +29,7 @@ import { Separator } from "@/components/ui/separator";
 import { IoClose } from "react-icons/io5";
 import { StatusDropDown } from "../AppTable/dropdowns/StatusDropDown";
 import { CategoryDropDown } from "../AppTable/dropdowns/CategoryDropDown";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { BiFirstPage, BiLastPage } from "react-icons/bi";
 import { GrFormNext, GrFormPrevious } from "react-icons/gr";
 import PaginationSelection from "./PaginationSelection";
@@ -43,6 +44,24 @@ export interface PaginationType {
   pageSize: number;
 }
 
+// Define custom filter types
+declare module "@tanstack/table-core" {
+  interface FilterFns {
+    multiSelect: FilterFn<unknown>;
+  }
+}
+
+// Define the custom filter function
+const multiSelectFilter: FilterFn<unknown> = (
+  row,
+  columnId,
+  filterValue: string[],
+) => {
+  const rowValue = (row.getValue(columnId) as string).toLowerCase();
+  const lowercaseFilterValues = filterValue.map((val) => val.toLowerCase());
+  return filterValue.length === 0 || lowercaseFilterValues.includes(rowValue);
+};
+
 export default function ProductTable<TData, TValue>({
   columns,
   data,
@@ -54,11 +73,54 @@ export default function ProductTable<TData, TValue>({
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
+  // Combined useEffect for both filters
+  useEffect(() => {
+    setColumnFilters((prev) => {
+      // Remove both status and category filters
+      const baseFilters = prev.filter(
+        (filter) => filter.id !== "status" && filter.id !== "category",
+      );
+
+      const newFilters = [...baseFilters];
+
+      // Add status filter if there are selected statuses
+      if (selectedStatuses.length > 0) {
+        newFilters.push({
+          id: "status",
+          value: selectedStatuses,
+        });
+      }
+
+      // Add category filter if there are selected categories
+      if (selectedCategories.length > 0) {
+        newFilters.push({
+          id: "category",
+          value: selectedCategories,
+        });
+      }
+
+      console.log("New Column Filters:", newFilters);
+      return newFilters;
+    });
+
+    // Set initial sorting for the "createdAt" column
+    setSorting([
+      {
+        id: "createdAt",
+
+        desc: true,
+      },
+    ]);
+  }, [selectedStatuses, selectedCategories]);
 
   const table = useReactTable({
     data,
     columns,
     state: { pagination, sorting, columnFilters },
+    filterFns: { multiSelect: multiSelectFilter },
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getSortedRowModel: getSortedRowModel(),
@@ -80,13 +142,24 @@ export default function ProductTable<TData, TValue>({
             className="max-w-sm h-10"
           />
           <div className="flex items-center gap-4">
-            <StatusDropDown />
-            <CategoryDropDown />
+            <StatusDropDown
+              selectedStatuses={selectedStatuses}
+              setSelectedStatuses={setSelectedStatuses}
+            />
+            <CategoryDropDown
+              selectedCategories={selectedCategories}
+              setSelectedCategories={setSelectedCategories}
+            />
           </div>
         </div>
 
         {/* filter area */}
-        <FilterArea />
+        <FilterArea
+          selectedStatuses={selectedStatuses}
+          setSelectedStatuses={setSelectedStatuses}
+          selectedCategories={selectedCategories}
+          setSelectedCategories={setSelectedCategories}
+        />
       </div>
 
       {/* table area */}
@@ -203,32 +276,82 @@ export default function ProductTable<TData, TValue>({
   );
 }
 
-function FilterArea() {
+function FilterArea({
+  selectedStatuses,
+  setSelectedStatuses,
+  selectedCategories,
+  setSelectedCategories,
+}: {
+  selectedStatuses: string[];
+  setSelectedStatuses: Dispatch<SetStateAction<string[]>>;
+  selectedCategories: string[];
+  setSelectedCategories: Dispatch<SetStateAction<string[]>>;
+}) {
   return (
-    <div className="flex gap-3">
-      {/* status filter */}
-      <div className="border-dashed border rounded-sm p-1 flex gap-2 items-center px-2 text-sm">
-        <span className="text-gray-600">Status</span>
-        <Separator orientation="vertical" />
-        <div className="flex gap-2 items-center">
-          <Badge variant={"secondary"}>item 1</Badge>
-          <Badge variant={"secondary"}>item 2</Badge>
+    <div className="flex gap-3 poppins">
+      {/* selected status filter */}
+      {selectedStatuses.length > 0 && (
+        <div className="border-dashed border rounded-sm p-1 flex gap-2 items-center px-2 text-sm">
+          <span className="text-gray-600">Status</span>
+          <Separator orientation="vertical" />
+          <div className="flex gap-2 items-center">
+            {selectedStatuses.length < 3 ? (
+              <>
+                {selectedStatuses.map((status, index) => (
+                  <Badge key={index} variant={"secondary"}>
+                    {status}
+                  </Badge>
+                ))}
+              </>
+            ) : (
+              <>
+                <Badge variant={"secondary"}>
+                  {selectedStatuses.length} Selected
+                </Badge>
+              </>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* category filter */}
-      <div className="border-dashed border rounded-sm p-1 flex gap-2 items-center px-2 text-sm">
-        <span className="text-gray-600">Status</span>
-        <Separator orientation="vertical" />
-        <div className="flex gap-2 items-center">
-          <Badge variant={"secondary"}>item 1</Badge>
-          <Badge variant={"secondary"}>item 2</Badge>
+      {/* selected category filter*/}
+      {selectedCategories.length > 0 && (
+        <div className="border-dashed border rounded-sm p-1 flex gap-2 items-center px-2 text-sm">
+          <span className="text-gray-600">category</span>
+          <Separator orientation="vertical" />
+          <div className="flex gap-2 items-center">
+            {selectedCategories.length < 3 ? (
+              <>
+                {selectedCategories.map((category, index) => (
+                  <Badge key={index} variant={"secondary"}>
+                    {category}
+                  </Badge>
+                ))}
+              </>
+            ) : (
+              <>
+                <Badge variant={"secondary"}>
+                  {selectedCategories.length} Selected
+                </Badge>
+              </>
+            )}
+          </div>
         </div>
-      </div>
-      <Button variant={"ghost"} className="p-1 px-2">
-        <span>Reset</span>
-        <IoClose />
-      </Button>
+      )}
+
+      {(selectedCategories.length > 0 || selectedStatuses.length > 0) && (
+        <Button
+          onClick={() => {
+            setSelectedCategories([]);
+            setSelectedStatuses([]);
+          }}
+          variant={"ghost"}
+          className="p-1 px-2"
+        >
+          <span>Reset</span>
+          <IoClose />
+        </Button>
+      )}
     </div>
   );
 }
