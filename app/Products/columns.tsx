@@ -5,6 +5,15 @@ import { ReactNode } from "react";
 import { FaCheck, FaInbox } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
 import ProductDropDown from "./ProductDropDown";
+import { IoMdArrowDown, IoMdArrowUp } from "react-icons/io";
+import { ArrowUpDown } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 export type Product = {
   id: string;
@@ -32,7 +41,7 @@ export type Product = {
 export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: () => "Name",
+
     cell: ({ row }) => {
       const icon = row.original.icon;
       const name = row.original.name;
@@ -43,6 +52,36 @@ export const columns: ColumnDef<Product>[] = [
           </div>
           <span>{name}</span>
         </div>
+      );
+    },
+    header: ({ column }) => {
+      const isSorted = column.getIsSorted();
+      const SortingIcon =
+        isSorted === "asc"
+          ? IoMdArrowDown
+          : isSorted === "desc"
+            ? IoMdArrowUp
+            : ArrowUpDown;
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" aria-label="Sort by Name">
+              Name
+              <SortingIcon className="ml-2 h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" side="bottom">
+            <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
+              <IoMdArrowUp className="mr-2 h-4 w-4" />
+              Asc
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
+              <IoMdArrowDown className="mr-2 h-4 w-4" />
+              Desc
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       );
     },
   },

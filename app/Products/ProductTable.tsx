@@ -72,7 +72,7 @@ export default function ProductTable<TData, TValue>({
       </div>
 
       {/* table area */}
-      <div className="overflow-hidden rounded-md border">
+      <div className="overflow-hidden rounded-md border px-5 py-2">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
