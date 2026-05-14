@@ -1,9 +1,10 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, Row } from "@tanstack/react-table";
 import { ReactNode } from "react";
 import { FaCheck, FaInbox } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
+import ProductDropDown from "./ProductDropDown";
 
 export type Product = {
   id: string;
@@ -101,5 +102,11 @@ export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "supplier",
     header: () => "Supplier",
+  },
+  {
+    accessorKey: "actions",
+    cell: ({ row }) => {
+      return <ProductDropDown row={row} />;
+    },
   },
 ];
