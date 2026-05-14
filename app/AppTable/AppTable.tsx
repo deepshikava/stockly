@@ -8,6 +8,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import ProductTable from "../Products/ProductTable";
+import { products } from "../Products/productData";
+import { columns } from "../Products/columns";
 
 export default function AppTable() {
   return (
@@ -22,7 +24,7 @@ export default function AppTable() {
         </CardAction>
       </CardHeader>
       <CardContent>
-        <ProductTable />
+        <ProductTable columns={columns} data={products} />
       </CardContent>
     </Card>
   );

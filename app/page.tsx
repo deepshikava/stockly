@@ -20,8 +20,8 @@ export default function Home() {
   if (!isClient) return null;
 
   return (
-    <div className={`poppins p-5 ${bgColor} border w-full min-h-screen`}>
-      <Card className="flex flex-col shadow-none p-5">
+    <div className={`poppins p-8 ${bgColor} border w-full min-h-screen`}>
+      <Card className="flex flex-col shadow-none p-8">
         <AppHeader />
         <AppTable />
       </Card>
