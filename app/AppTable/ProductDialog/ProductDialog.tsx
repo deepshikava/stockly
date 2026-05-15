@@ -216,7 +216,15 @@ export default function ProductDialog() {
     }, 0);
   }
   return (
-    <Dialog open={openProductDialog} onOpenChange={setOpenProductDialog}>
+    <Dialog
+      open={openProductDialog}
+      onOpenChange={(open) => {
+        if (!open) {
+          handleReset();
+        }
+        setOpenProductDialog(open);
+      }}
+    >
       <DialogTrigger asChild>
         <Button className="h-10">Add Product</Button>
       </DialogTrigger>
@@ -266,7 +274,9 @@ export default function ProductDialog() {
                 </Button>
               </DialogClose>
 
-              <Button className="h-11 px-11">Add Product</Button>
+              <Button className="h-11 px-11">
+                {selectedProduct ? "Edit Product" : "Add Product"}
+              </Button>
             </DialogFooter>
           </form>
         </FormProvider>

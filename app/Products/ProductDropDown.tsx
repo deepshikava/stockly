@@ -13,6 +13,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import { useProductStore } from "../useProductStore";
+import { toast } from "sonner";
+import { nanoid } from "nanoid";
 
 type MenuItem = {
   icon: ReactElement;
@@ -22,8 +24,12 @@ type MenuItem = {
 };
 
 export default function ProductDropDown({ row }: { row: Row<Product> }) {
-  const { setOpenDialog, setSelectedProduct, setOpenProductDialog } =
-    useProductStore();
+  const {
+    setOpenDialog,
+    setSelectedProduct,
+    setOpenProductDialog,
+    addProduct,
+  } = useProductStore();
   const menuItems: MenuItem[] = [
     { icon: <MdContentCopy />, label: "Copy", className: "" },
     { icon: <FaRegEdit />, label: "Edit", className: "" },
@@ -35,7 +41,7 @@ export default function ProductDropDown({ row }: { row: Row<Product> }) {
     },
   ];
 
-  function handleClickedItem(item: MenuItem) {
+  async function handleClickedItem(item: MenuItem) {
     if (item.label === "Delete") {
       setOpenDialog(true);
       setSelectedProduct(row.original);
@@ -44,6 +50,27 @@ export default function ProductDropDown({ row }: { row: Row<Product> }) {
     if (item.label === "Edit") {
       setOpenProductDialog(true);
       setSelectedProduct(row.original);
+    }
+
+    if (item.label === "Copy") {
+      const productToCopy: Product = {
+        ...row.original,
+        id: nanoid(),
+        name: `${row.original.name} (copy)`,
+        createdAt: new Date(),
+      };
+
+      const result = await addProduct(productToCopy);
+
+      if (result.success) {
+        toast.success("Copy Success", {
+          description: "Product has been copied successfully",
+        });
+      } else {
+        toast.error("Error", {
+          description: "Something went wrong while copying the product",
+        });
+      }
     }
   }
 
