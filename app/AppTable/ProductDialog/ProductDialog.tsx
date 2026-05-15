@@ -17,12 +17,15 @@ import { ProductCategory } from "./_components/ProductCategory";
 import Status from "./_components/Status";
 import Quantity from "./_components/Quantity";
 import Price from "./_components/Price";
-import { ReactNode, useState } from "react";
+import { ReactNode, useRef, useState } from "react";
 import { z } from "zod";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Product } from "@/app/Products/columns";
 import { nanoid } from "nanoid";
+import { useProductStore } from "@/app/useProductStore";
+import { toast } from "sonner";
+import { icons } from "./Icons";
 
 const ProductSchema = z.object({
   productName: z
@@ -95,7 +98,12 @@ export default function ProductDialog() {
   const [selectedCategory, setSelectedCategory] =
     useState<Product["category"]>(defaultCategory);
 
-  const [selectedIcon, setSelectedIcon] = useState<null | ReactNode>(null);
+  const [selectedIcon, setSelectedIcon] = useState<null | ReactNode>(
+    icons.find((icon) => icon.isSelected === true)?.icon || null,
+  );
+
+  const { addProduct } = useProductStore();
+  const dialogCloseRef = useRef<HTMLButtonElement | null>(null);
 
   const onSubmit = async (data: ProductFormData) => {
     console.log("Data Submitted", data);
@@ -113,7 +121,21 @@ export default function ProductDialog() {
       createdAt: new Date(),
     };
 
-    console.log(newProduct);
+    const result = await addProduct(newProduct);
+
+    console.log(result);
+
+    if (result.success) {
+      toast.success("Success", {
+        description: "Product added successfully",
+      });
+
+      console.log(result);
+
+      if (dialogCloseRef.current) {
+        dialogCloseRef.current.click();
+      }
+    }
   };
 
   function resetDialog() {
@@ -178,7 +200,7 @@ export default function ProductDialog() {
               </div>
             </div>
             <DialogFooter className="mt-5  flex items-center gap-4 bg-white">
-              <DialogClose asChild>
+              <DialogClose ref={dialogCloseRef} asChild>
                 <Button
                   type="button"
                   variant="secondary"
