@@ -17,7 +17,7 @@ import { ProductCategory } from "./_components/ProductCategory";
 import Status from "./_components/Status";
 import Quantity from "./_components/Quantity";
 import Price from "./_components/Price";
-import { ReactNode, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -102,55 +102,109 @@ export default function ProductDialog() {
     icons.find((icon) => icon.isSelected === true)?.icon || null,
   );
 
-  const { addProduct } = useProductStore();
+  const {
+    addProduct,
+    isLoading,
+    openProductDialog,
+    setOpenProductDialog,
+    setSelectedProduct,
+    selectedProduct,
+    updateProduct,
+  } = useProductStore();
   const dialogCloseRef = useRef<HTMLButtonElement | null>(null);
 
-  const onSubmit = async (data: ProductFormData) => {
-    console.log("Data Submitted", data);
-
-    const newProduct: Product = {
-      id: nanoid(),
-      supplier: data.supplier,
-      name: data.productName,
-      price: data.price,
-      quantityInStock: data.quantity,
-      sku: data.sku,
-      status: selectedTab,
-      category: selectedCategory,
-      icon: selectedIcon,
-      createdAt: new Date(),
-    };
-
-    const result = await addProduct(newProduct);
-
-    console.log(result);
-
-    if (result.success) {
-      toast.success("Success", {
-        description: "Product added successfully",
+  useEffect(() => {
+    if (selectedProduct) {
+      //update form with the selected product details ehrn dialog opens
+      reset({
+        productName: selectedProduct.name,
+        sku: selectedProduct.sku,
+        supplier: selectedProduct.supplier,
+        quantity: selectedProduct.quantityInStock,
+        price: selectedProduct.price,
       });
+      setSelectedTab(selectedProduct.status);
+      setSelectedCategory(selectedProduct.category);
+      setSelectedIcon(selectedProduct.icon);
+    } else {
+      //Reset form values if no product is selected
+      reset(defaultFormValues);
+      setSelectedTab(defaultStatus);
+      setSelectedCategory(defaultCategory);
+      setSelectedIcon(null);
+    }
+  }, [selectedProduct, openProductDialog]);
+
+  const onSubmit = async (data: ProductFormData) => {
+    if (!selectedProduct) {
+      //add new product
+
+      const newProduct: Product = {
+        id: nanoid(),
+        supplier: data.supplier,
+        name: data.productName,
+        price: data.price,
+        quantityInStock: data.quantity,
+        sku: data.sku,
+        status: selectedTab,
+        category: selectedCategory,
+        icon: selectedIcon,
+        createdAt: new Date(),
+      };
+
+      const result = await addProduct(newProduct);
 
       console.log(result);
 
-      if (dialogCloseRef.current) {
-        dialogCloseRef.current.click();
+      if (result.success) {
+        toast.success("Success", {
+          description: "Product added successfully",
+        });
+
+        console.log(result);
+
+        if (dialogCloseRef.current) {
+          dialogCloseRef.current.click();
+        }
+      }
+    } else {
+      //update existing product
+
+      const productToUpdate: Product = {
+        id: selectedProduct.id,
+        supplier: data.supplier,
+        name: data.productName,
+        price: data.price,
+        quantityInStock: data.quantity,
+        sku: data.sku,
+        status: selectedTab,
+        category: selectedCategory,
+        icon: selectedIcon,
+        createdAt: selectedProduct.createdAt,
+      };
+
+      const result = await updateProduct(productToUpdate);
+
+      if (result.success) {
+        toast.success("Success", {
+          description: "Product updated successfully",
+        });
+      } else {
+        toast.error("Error", {
+          description: "Something went wrong while updating the product",
+        });
       }
     }
   };
 
-  function resetDialog() {
+  function handleReset() {
     reset(defaultFormValues);
     setSelectedTab(defaultStatus);
     setSelectedCategory(defaultCategory);
     setSelectedIcon(null);
+    setSelectedProduct(null);
+    setOpenProductDialog(false);
     setFormKey((key) => key + 1);
-  }
-
-  function handleOpenChange(nextOpen: boolean) {
-    setOpen(nextOpen);
-    if (!nextOpen) {
-      resetDialog();
-    }
   }
 
   function onSelectedIcon(icon: ReactNode) {
@@ -162,13 +216,15 @@ export default function ProductDialog() {
     }, 0);
   }
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={openProductDialog} onOpenChange={setOpenProductDialog}>
       <DialogTrigger asChild>
         <Button className="h-10">Add Product</Button>
       </DialogTrigger>
       <DialogContent className="poppins max-h-[min(90vh,calc(100dvh-2rem))] w-full min-w-0 overflow-y-auto p-7 px-8 sm:max-w-xl md:max-w-xl lg:max-w-3xl xl:max-w-4xl">
         <DialogHeader>
-          <DialogTitle className="text-[22px]">Add Product</DialogTitle>
+          <DialogTitle className="text-[22px]">
+            {selectedProduct ? "Edit Product" : "Add Product"}
+          </DialogTitle>
           <DialogDescription>
             Fill in the form to add a new product.
           </DialogDescription>
@@ -200,7 +256,7 @@ export default function ProductDialog() {
               </div>
             </div>
             <DialogFooter className="mt-5  flex items-center gap-4 bg-white">
-              <DialogClose ref={dialogCloseRef} asChild>
+              <DialogClose ref={dialogCloseRef} onClick={handleReset} asChild>
                 <Button
                   type="button"
                   variant="secondary"

@@ -22,7 +22,8 @@ type MenuItem = {
 };
 
 export default function ProductDropDown({ row }: { row: Row<Product> }) {
-  const { setOpenDialog, setSelectedProduct } = useProductStore();
+  const { setOpenDialog, setSelectedProduct, setOpenProductDialog } =
+    useProductStore();
   const menuItems: MenuItem[] = [
     { icon: <MdContentCopy />, label: "Copy", className: "" },
     { icon: <FaRegEdit />, label: "Edit", className: "" },
@@ -37,6 +38,11 @@ export default function ProductDropDown({ row }: { row: Row<Product> }) {
   function handleClickedItem(item: MenuItem) {
     if (item.label === "Delete") {
       setOpenDialog(true);
+      setSelectedProduct(row.original);
+    }
+
+    if (item.label === "Edit") {
+      setOpenProductDialog(true);
       setSelectedProduct(row.original);
     }
   }
