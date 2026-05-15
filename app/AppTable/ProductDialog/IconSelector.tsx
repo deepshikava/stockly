@@ -214,11 +214,15 @@ export function IconDialogBox() {
 }
 
 // Example usage (can be in a separate file)
-export function IconSelector() {
+export function IconSelector({
+  onUpdateIcon,
+}: {
+  onUpdateIcon: (selectedIcon: ReactNode) => void;
+}) {
   function updatedIcon(selectedIcon: ReactNode) {
-    // onUpdateIcon(selectedIcon);
-    const newTask = { name: "task", icon: convertIconToString(selectedIcon) };
-    console.log(newTask);
+    onUpdateIcon(selectedIcon);
+    // const newTask = { name: "task", icon: convertIconToString(selectedIcon) };
+    // console.log(newTask);
   }
 
   return (

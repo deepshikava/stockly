@@ -4,7 +4,20 @@ import { MdError } from "react-icons/md";
 import { IconSelector } from "../IconSelector";
 import { useFormContext } from "react-hook-form";
 import { ReactNode } from "react";
-export default function ProductName() {
+export default function ProductName({
+  onSelectedIcon,
+}: {
+  onSelectedIcon: (selectedIcon: ReactNode) => void;
+}) {
+  const {
+    register,
+    formState: { errors },
+  } = useFormContext();
+
+  function getSelectedIcon(selectedIcon: ReactNode) {
+    onSelectedIcon(selectedIcon);
+  }
+
   return (
     <div className="mt-5 flex flex-col gap-2">
       <Label htmlFor="product-name" className="text-slate-600">
@@ -12,18 +25,21 @@ export default function ProductName() {
       </Label>
       <div className="flex gap-2 items-center">
         <Input
+          {...register("productName")}
           type="text"
           id="product-name"
           className="h-11 shadow-none"
           placeholder="Laptop..."
         />
-        <IconSelector />
+        <IconSelector onUpdateIcon={getSelectedIcon} />
       </div>
 
-      <div className="text-red-500 flex gap-1 items-center text-[13px]">
-        <MdError />
-        <p>The product name is required</p>
-      </div>
+      {errors.productName && (
+        <div className="text-red-500 flex gap-1 items-center text-[13px]">
+          <MdError />
+          <p>The product name is required</p>
+        </div>
+      )}
     </div>
   );
 }

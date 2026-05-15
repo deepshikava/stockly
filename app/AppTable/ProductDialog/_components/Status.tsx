@@ -8,14 +8,23 @@ import { IoClose } from "react-icons/io5";
 import { FaInbox } from "react-icons/fa";
 import { Product } from "@/app/Products/columns";
 
-export default function Status() {
-  const [selectedTab, setSelectedTab] = useState("Published");
-  console.log(selectedTab);
-
+export default function Status({
+  selectedTab,
+  setSelectedTab,
+}: {
+  selectedTab: string;
+  setSelectedTab: Dispatch<SetStateAction<Product["status"]>>;
+}) {
   return (
-    <div>
+    <div className=" flex flex-col gap-2 pt-[6px]">
       <Label className="text-slate-600">Status</Label>
-      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="mt-1">
+      <Tabs
+        value={selectedTab}
+        onValueChange={(value: string) =>
+          setSelectedTab(value as Product["status"])
+        }
+        className="mt-1"
+      >
         <TabsList className="h-11 px-2">
           <TabsTrigger
             className={`h-8 ${

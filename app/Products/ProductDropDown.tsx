@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { Row } from "@tanstack/react-table";
 import { FaRegEdit } from "react-icons/fa";
 import { MdContentCopy, MdOutlineDelete } from "react-icons/md";
@@ -13,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 
 type MenuItem = {
-  icon: JSX.Element;
+  icon: ReactElement;
   label: string;
   className: string;
   separator?: undefined;

@@ -17,10 +17,130 @@ import { ProductCategory } from "./_components/ProductCategory";
 import Status from "./_components/Status";
 import Quantity from "./_components/Quantity";
 import Price from "./_components/Price";
+import { ReactNode, useState } from "react";
+import { z } from "zod";
+import { useForm, FormProvider } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Product } from "@/app/Products/columns";
+import { nanoid } from "nanoid";
+
+const ProductSchema = z.object({
+  productName: z
+    .string()
+    .min(1, "Product Name is required")
+    .max(100, "Product Name must be 100 characters or less"),
+  sku: z
+    .string()
+    .min(1, "SKU is required")
+    .regex(/^[a-zA-Z0-9-_]+$/, "SKU must be alphanumeric"),
+  supplier: z
+    .string()
+    .min(1, "Supplier is required")
+    .max(100, "Supplier name must be 100 characters or less"),
+
+  quantity: z
+    .number()
+    .refine((val) => (typeof val === "number" ? val !== 0 : val !== ""), {
+      message: "Quantity is required",
+    })
+    .int("Quantity must be an integer")
+    .nonnegative("Quantity cannot be negative"),
+  price: z
+    .union([z.string(), z.number()])
+    .refine((val) => (typeof val === "number" ? val !== 0 : val !== ""), {
+      message: "Price is required",
+    })
+    .transform((val) => {
+      // If it's an empty string, this will fail validation
+      if (val === "") return undefined;
+      // Convert to number and fix to 2 decimal places
+      const num = Number(val);
+      return Number(num.toFixed(2));
+    })
+    .pipe(
+      z
+        .number({ message: "Price must be a number" })
+        .nonnegative("Price cannot be negative"),
+    ),
+});
+
+type ProductFormValues = z.input<typeof ProductSchema>;
+type ProductFormData = z.output<typeof ProductSchema>;
+
+const defaultFormValues: ProductFormValues = {
+  productName: "",
+  sku: "",
+  supplier: "",
+  quantity: 0,
+  price: 0,
+};
+
+const defaultStatus: Product["status"] = "Published";
+const defaultCategory: Product["category"] = "Electronics";
 
 export default function ProductDialog() {
+  const [open, setOpen] = useState(false);
+  const [formKey, setFormKey] = useState(0);
+
+  const methods = useForm<ProductFormValues, unknown, ProductFormData>({
+    resolver: zodResolver(ProductSchema),
+    defaultValues: defaultFormValues,
+  });
+
+  const { reset } = methods;
+
+  const [selectedTab, setSelectedTab] =
+    useState<Product["status"]>(defaultStatus);
+
+  const [selectedCategory, setSelectedCategory] =
+    useState<Product["category"]>(defaultCategory);
+
+  const [selectedIcon, setSelectedIcon] = useState<null | ReactNode>(null);
+
+  const onSubmit = async (data: ProductFormData) => {
+    console.log("Data Submitted", data);
+
+    const newProduct: Product = {
+      id: nanoid(),
+      supplier: data.supplier,
+      name: data.productName,
+      price: data.price,
+      quantityInStock: data.quantity,
+      sku: data.sku,
+      status: selectedTab,
+      category: selectedCategory,
+      icon: selectedIcon,
+      createdAt: new Date(),
+    };
+
+    console.log(newProduct);
+  };
+
+  function resetDialog() {
+    reset(defaultFormValues);
+    setSelectedTab(defaultStatus);
+    setSelectedCategory(defaultCategory);
+    setSelectedIcon(null);
+    setFormKey((key) => key + 1);
+  }
+
+  function handleOpenChange(nextOpen: boolean) {
+    setOpen(nextOpen);
+    if (!nextOpen) {
+      resetDialog();
+    }
+  }
+
+  function onSelectedIcon(icon: ReactNode) {
+    console.log(icon);
+
+    // Ensuring that the state update happens outside of render flow
+    setTimeout(() => {
+      setSelectedIcon(icon);
+    }, 0);
+  }
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button className="h-10">Add Product</Button>
       </DialogTrigger>
@@ -32,31 +152,46 @@ export default function ProductDialog() {
           </DialogDescription>
         </DialogHeader>
         <Separator />
-        <div className="flex flex-col gap-2 mt-1">
-          <div className="grid grid-cols-2 gap-7">
-            <ProductName />
-            <SKU />
-          </div>
+        {/*  */}
+        <FormProvider {...methods}>
+          <form key={formKey} onSubmit={methods.handleSubmit(onSubmit)}>
+            <div className="flex flex-col gap-2 mt-1">
+              <div className="grid grid-cols-2 gap-7">
+                <ProductName onSelectedIcon={onSelectedIcon} />
+                <SKU />
+              </div>
 
-          <div className="grid grid-cols-2 gap-5 items-center">
-            <Supplier />
-            <ProductCategory />
-          </div>
-          <div className="mt-3 grid grid-cols-3 gap-7 items-center max-lg:grid-cols-2 max-lg:gap-1 max-sm:grid-cols-1">
-            <Status />
-            <Quantity />
-            <Price />
-          </div>
-        </div>
-        <DialogFooter>
-          <DialogClose>
-            <Button asChild variant={"secondary"} className="h-11 px-11">
-              Cancel
-            </Button>
-          </DialogClose>
+              <div className="grid grid-cols-2 gap-5 items-center">
+                <Supplier />
+                <ProductCategory
+                  selectedCategory={selectedCategory}
+                  setSelectedCategory={setSelectedCategory}
+                />
+              </div>
+              <div className="mt-3 grid grid-cols-3 gap-7 items-center max-lg:grid-cols-2 max-lg:gap-1 max-sm:grid-cols-1">
+                <Status
+                  selectedTab={selectedTab}
+                  setSelectedTab={setSelectedTab}
+                />
+                <Quantity />
+                <Price />
+              </div>
+            </div>
+            <DialogFooter className="mt-5  flex items-center gap-4 bg-white">
+              <DialogClose asChild>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="h-11 px-11"
+                >
+                  Cancel
+                </Button>
+              </DialogClose>
 
-          <Button className="h-11 px-11">Add Product</Button>
-        </DialogFooter>
+              <Button className="h-11 px-11">Add Product</Button>
+            </DialogFooter>
+          </form>
+        </FormProvider>
       </DialogContent>
     </Dialog>
   );

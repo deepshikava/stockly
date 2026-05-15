@@ -10,9 +10,15 @@ import {
 } from "@/components/ui/select";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
-export function ProductCategory() {
+export function ProductCategory({
+  selectedCategory,
+  setSelectedCategory,
+}: {
+  selectedCategory: string;
+  setSelectedCategory: Dispatch<SetStateAction<Product["category"]>>;
+}) {
   const [isClient, setIsClient] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("");
+
   const categories = [
     "Electronics",
     "Furniture",
@@ -29,7 +35,7 @@ export function ProductCategory() {
   useEffect(() => {
     setTimeout(() => {
       setIsClient(true);
-      setSelectedCategory(categories[0]);
+      setSelectedCategory("Electronics");
     }, 100);
   }, []);
 
@@ -39,7 +45,12 @@ export function ProductCategory() {
     <div className="flex flex-col gap-2 poppins">
       <Label className="text-slate-600">{`Product's Category`}</Label>
 
-      <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+      <Select
+        value={selectedCategory}
+        onValueChange={(value: string) =>
+          setSelectedCategory(value as Product["category"])
+        }
+      >
         <SelectTrigger className="h-[45px] shadow-none">
           <SelectValue placeholder="Select a Category" />
         </SelectTrigger>
