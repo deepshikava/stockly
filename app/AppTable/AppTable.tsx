@@ -1,14 +1,5 @@
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ProductTable from "../Products/ProductTable";
-import { products } from "../Products/productData";
 import { columns } from "../Products/columns";
 import ProductDialog from "./ProductDialog/ProductDialog";
 import { useProductStore } from "../useProductStore";
@@ -29,7 +20,9 @@ export default function AppTable() {
         <div className="flex justify-between items-center">
           <div>
             <CardTitle className="font-bold text-[23px]">Products</CardTitle>
-            <p className=" text-sm text-slate-600">34 products</p>
+            <p className=" text-sm text-slate-600">
+              {allProducts.length} products
+            </p>
           </div>
         </div>
         <ProductDialog />
