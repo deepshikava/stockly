@@ -97,6 +97,24 @@ export const columns: ColumnDef<Product>[] = [
     header: ({ column }) => <SortableHeader column={column} label="SKU" />,
   },
   {
+    accessorKey: "createdAt",
+    header: ({ column }) => (
+      <SortableHeader column={column} label="Created At" />
+    ),
+    cell: ({ getValue }) => {
+      const date = getValue<Date>();
+      return (
+        <span>
+          {date.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}
+        </span>
+      );
+    },
+  },
+  {
     accessorKey: "price",
     header: ({ column }) => <SortableHeader column={column} label="Price" />,
     cell: ({ getValue }) => `$${getValue<number>().toFixed(2)}`,
